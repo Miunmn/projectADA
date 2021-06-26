@@ -1,0 +1,5 @@
+.vscode/
+.idea/
+.history/
+*.code-workspace
+__pycache__
