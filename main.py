@@ -84,10 +84,10 @@ def recover_permutation(max_frequencies, original_positions):
 def main():
 
     str_list = []
-    with open('tests/'+ sys.argv[1]+ '.csv') as file:
-        csv_reader = csv.reader(file, delimiter=',')
-        for row in csv_reader:
-            str_list.append(row[0])
+    file1 = open('tests/'+ sys.argv[1] +'.txt', 'r')
+    Lines = file1.readlines()
+    for line in Lines:
+        str_list.append(line.strip())
 
     trie = Trie(str_list)
 
