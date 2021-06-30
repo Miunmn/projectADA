@@ -1,5 +1,6 @@
 from typing import *
 from trie import Trie
+import csv, sys
 
 FrequencyMap = Dict[str, int]
 
@@ -81,11 +82,12 @@ def recover_permutation(max_frequencies, original_positions):
 
 
 def main():
-    print(integer_sort([4, 6, 3, 1, 9, 2]))
-    str_list = ["aaa",
-                "baa",
-                "bac",
-                "cbb"]
+
+    str_list = []
+    with open('tests/'+ sys.argv[1]+ '.csv') as file:
+        csv_reader = csv.reader(file, delimiter=',')
+        for row in csv_reader:
+            str_list.append(row[0])
 
     trie = Trie(str_list)
 
