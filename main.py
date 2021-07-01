@@ -17,17 +17,15 @@ def heuristic_best_trie(str_list: List[str]) -> Tuple[Trie, int]:
 
 # Execution time: O(n*m + m + n) ~ O(n*m)
 # Space: O(m*|E|)
-def heuristic_best_permutation(str_list):
-    char_freq_table = char_frequency_table(str_list)                # O(n * m)
-    col_lens = [len(col) for col in char_freq_table]                # O(m)
-    orig_indexes = original_indexes(col_lens)                       # O(m)
-    sorted_frequencies = integer_sort(col_lens, reverse=False)      # O(m + n)
-    p = recover_permutation(sorted_frequencies, orig_indexes)       # O(m)
-    return p
+def heuristic_best_permutation(str_list):            
+    dif_count_list = count_different_per_column(str_list)           # O(n * m)
+    orig_indexes = map_original_positions(dif_count_list)           # O(m)
+    sorted_dif_list = integer_sort(dif_count_list, reverse=False)   # O(m + n)
+    return recover_permutation(sorted_dif_list, orig_indexes)       # O(m)
 
 
 # Execution time: O(n*m), Space: O(m*min(|E|, n)) ~ O(m*|E|)
-def char_frequency_table(str_list):
+def count_different_per_column(str_list):
     m = len(str_list[0])
     column_freq: List[FrequencyMap] = [{} for _ in range(m)]        # O(m)
     for string in str_list:                                         # O(n) *
@@ -35,12 +33,12 @@ def char_frequency_table(str_list):
             if char not in column_freq[index]:                      # |
                 column_freq[index][char] = 0                        # O(1)
             column_freq[index][char] += 1                           # |
-
-    return column_freq
+                                                                    
+    return [len(col) for col in column_freq]                        # O(m)
 
 
 # Execution time: O(m), Space: O(m)
-def original_indexes(col_max_freq):
+def map_original_positions(col_max_freq):
     # length of col_max_freq is m
     index_map = {}
     for column, frequency in enumerate(col_max_freq):               # O(m) *
@@ -89,12 +87,15 @@ def main():
     
     trie = Trie(str_list)
 
+    print("Original:")
+    print(f"nodes={trie.nodes()}")
     trie.pretty_print()
-    print(trie.nodes())
 
     trie2, nodes = heuristic_best_trie(str_list)
+
+    print("Optimized:")
+    print(f"{nodes=}")
     trie2.pretty_print()
-    print(nodes)
 
 
 if __name__ == '__main__':
