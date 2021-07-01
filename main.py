@@ -85,6 +85,9 @@ def main():
     with open('tests/'+ sys.argv[1] +'.txt', 'r') as file:
         str_list.extend((line.rstrip() for line in file))
     
+    if len(str_list) < 1:
+        return
+
     trie = Trie(str_list)
 
     print("Original:")
