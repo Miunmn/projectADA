@@ -18,9 +18,10 @@ def heuristic_best_trie(str_list: List[str]) -> Tuple[Trie, int]:
 # Space: O(m*|E|)
 def heuristic_best_permutation(str_list):
     char_freq_table = char_frequency_table(str_list)               # O(n * m)
-    col_max_freq = [max(col.values()) for col in char_freq_table]  # O(m * |E|)
-    orig_indexes = original_indexes_per_freq(col_max_freq)         # O(m)
-    sorted_frequencies = integer_sort(col_max_freq, reverse=True)  # O(m + n)
+    print(char_freq_table)
+    col_lens = [len(col) for col in char_freq_table]  # O(m * |E|)
+    orig_indexes = original_indexes_per_freq(col_lens)         # O(m)
+    sorted_frequencies = integer_sort(col_lens, reverse=False)  # O(m + n)
     p = recover_permutation(sorted_frequencies, orig_indexes)      # O(m)
     return p
 
@@ -54,7 +55,7 @@ def original_indexes_per_freq(col_max_freq):
 # Execution time: O(m + n), Space: O(n)
 def integer_sort(int_list, reverse=False):
     min_elem, max_elem = min(int_list), max(int_list)
-    frequency_list = [0 for i in range(min_elem, max_elem + 1)]
+    frequency_list = [0 for _ in range(min_elem, max_elem + 1)]
     sorted_list = []
 
     for value in int_list:
@@ -64,7 +65,7 @@ def integer_sort(int_list, reverse=False):
         real_value = index + min_elem
         sorted_list.extend(iter(real_value for _ in range(count)))
 
-    if reverse == True:
+    if reverse is True:
         sorted_list.reverse()
 
     return sorted_list
