@@ -19,7 +19,6 @@ def heuristic_best_trie(str_list: List[str]) -> Tuple[Trie, int]:
 # Space: O(m*|E|)
 def heuristic_best_permutation(str_list):
     char_freq_table = char_frequency_table(str_list)               # O(n * m)
-    print(char_freq_table)
     col_lens = [len(col) for col in char_freq_table]  # O(m * |E|)
     orig_indexes = original_indexes_per_freq(col_lens)         # O(m)
     sorted_frequencies = integer_sort(col_lens, reverse=False)  # O(m + n)
@@ -87,6 +86,7 @@ def main():
     str_list = []
     file1 = open('tests/'+ sys.argv[1] +'.txt', 'r')
     Lines = file1.readlines()
+
     for line in Lines:
         str_list.append(line.strip())
 
