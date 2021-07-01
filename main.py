@@ -84,12 +84,9 @@ def recover_permutation(max_frequencies, original_positions):
 def main():
 
     str_list = []
-    file1 = open('tests/'+ sys.argv[1] +'.txt', 'r')
-    Lines = file1.readlines()
-
-    for line in Lines:
-        str_list.append(line.strip())
-
+    with open('tests/'+ sys.argv[1] +'.txt', 'r') as file1:
+        str_list.extend((line.rstrip() for line in file1))
+    
     trie = Trie(str_list)
 
     trie.pretty_print()
