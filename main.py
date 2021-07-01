@@ -10,19 +10,19 @@ FrequencyMap = Dict[str, int]
 def heuristic_best_trie(str_list: List[str]) -> Tuple[Trie, int]:
     p = heuristic_best_permutation(str_list)
 
-    permuted_input = (''.join(s[i] for i in p) for s in str_list)  # O(n*m)
-    trie = Trie(permuted_input)                                    # O(n*m)
+    permuted_input = (''.join(s[i] for i in p) for s in str_list)   # O(n*m)
+    trie = Trie(permuted_input)                                     # O(n*m)
     return trie, trie.nodes()
 
 
-# Execution time: O(n*m + m*|E| + m + n) ~ O(n*m)
+# Execution time: O(n*m + m + n) ~ O(n*m)
 # Space: O(m*|E|)
 def heuristic_best_permutation(str_list):
-    char_freq_table = char_frequency_table(str_list)               # O(n * m)
-    col_lens = [len(col) for col in char_freq_table]  # O(m * |E|)
-    orig_indexes = original_indexes_per_freq(col_lens)         # O(m)
-    sorted_frequencies = integer_sort(col_lens, reverse=False)  # O(m + n)
-    p = recover_permutation(sorted_frequencies, orig_indexes)      # O(m)
+    char_freq_table = char_frequency_table(str_list)                # O(n * m)
+    col_lens = [len(col) for col in char_freq_table]                # O(m)
+    orig_indexes = original_indexes(col_lens)                       # O(m)
+    sorted_frequencies = integer_sort(col_lens, reverse=False)      # O(m + n)
+    p = recover_permutation(sorted_frequencies, orig_indexes)       # O(m)
     return p
 
 
@@ -40,7 +40,7 @@ def char_frequency_table(str_list):
 
 
 # Execution time: O(m), Space: O(m)
-def original_indexes_per_freq(col_max_freq):
+def original_indexes(col_max_freq):
     # length of col_max_freq is m
     index_map = {}
     for column, frequency in enumerate(col_max_freq):               # O(m) *
