@@ -76,7 +76,7 @@ def OPT(strings, i, j):
         Kij = K(i, j)
         Rij = (x for x in range(m) if x not in Kij)
         Cijrs = (C(i, j, r) for r in Rij)
-        return min(sum(OPT_HAT(ī, j̄) + len(K(ī, j̄)) - len(Kij) for ī, j̄ in Cijr) for Cijr in Cijrs)
+        return min(sum(OPT_HAT(i_, j_) + len(K(i_, j_)) - len(Kij) for i_, j_ in Cijr) for Cijr in Cijrs)
 
     return OPT_HAT(i, j) + len(K(i, j))
 
@@ -86,35 +86,28 @@ def OPT_BUILD(strings, i, j):
     K = lambda i, j: equal_columns(strings, i, j, m)
     C = lambda i, j, r: subsections(strings, i, j, r)
     
-    OPT_BUILD_HAT_CACHE = {}
-
     def OPT_BUILD_HAT(i, j):
-        if (i, j) in OPT_BUILD_HAT_CACHE:
-            return OPT_BUILD_HAT_CACHE[(i, j)]
-
         if j - i < 2:
             return None, 0
 
         Kij = K(i, j)
         Rij = (x for x in range(m) if x not in Kij)
 
-        def tree_starting_at_row(r):
+        def result_starting_at(r):
             candidate, candidate_edges = GenSPT(r), 0
-            for ī, j̄ in C(i, j, r):
-                tail, tail_edges = OPT_BUILD_HAT(ī, j̄)
-                Kīj̄ = K(ī, j̄)
+            for i_, j_ in C(i, j, r):
+                tail, tail_edges = OPT_BUILD_HAT(i_, j_)
+                Ki_j_ = K(i_, j_)
 
-                for r̄ in Kīj̄ - Kij - {r}:
-                    tail = GenSPT(r̄, {strings[ī][r̄]: tail})
+                for r_ in Ki_j_ - Kij - {r}:
+                    tail = GenSPT(r_, {strings[i_][r_]: tail})
 
-                candidate.children[strings[ī][r]] = tail
-                candidate_edges += tail_edges + len(Kīj̄) - len(Kij)
+                candidate.children[strings[i_][r]] = tail
+                candidate_edges += tail_edges + len(Ki_j_) - len(Kij)
 
             return candidate, candidate_edges
 
-        result = min((tree_starting_at_row(r) for r in Rij), key=lambda x: x[1])
-        OPT_BUILD_HAT_CACHE[(i, j)] = result
-        return result
+        return min((result_starting_at(row) for row in Rij), key=lambda x: x[1])
         
 
     Kij = K(i, j)
@@ -125,9 +118,49 @@ def OPT_BUILD(strings, i, j):
 
     return root, (nodes + len(Kij))
     
+def OPT_BUILD_CACHED(strings, i, j):
+    m = len(strings[0])
+    K = lambda i, j: equal_columns(strings, i, j, m)
+    C = lambda i, j, r: subsections(strings, i, j, r)
+    
+    
+    def OPT_BUILD_HAT(i, j):
+        if j - i < 2:
+            return None, 0
+
+        Kij = K(i, j)
+        Rij = (x for x in range(m) if x not in Kij)
+
+        def result_starting_at(r):
+            candidate, candidate_edges = GenSPT(r), 0
+            for i_, j_ in C(i, j, r):
+                tail, tail_edges = OPT_BUILD_HAT(i_, j_)
+                Ki_j_ = K(i_, j_)
+
+                for r_ in Ki_j_ - Kij - {r}:
+                    tail = GenSPT(r_, {strings[i_][r_]: tail})
+
+                candidate.children[strings[i_][r]] = tail
+                candidate_edges += tail_edges + len(Ki_j_) - len(Kij)
+
+            return candidate, candidate_edges
+
+        return min((result_starting_at(row) for row in Rij), key=lambda x: x[1])
+        
+
+    Kij = K(i, j)
+    root, nodes = OPT_BUILD_HAT(i, j)
+
+    for k_index in Kij:
+        root = GenSPT(k_index, {strings[0][k_index]: root})
+
+    return root, (nodes + len(Kij))
 
 def MIN_TRIE_GEN(strings):
     return OPT_BUILD(strings, 0, len(strings))
+
+def MIN_TRIE_GEN_CACHED(strings):
+    return OPT_BUILD_CACHED(strings, 0, len(strings))
 
 def main ():
     strings = ['aaaa', 'abbb', 'acbc', 'addd']
