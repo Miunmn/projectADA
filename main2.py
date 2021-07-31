@@ -123,8 +123,12 @@ def OPT_BUILD_CACHED(strings, i, j):
     K = lambda i, j: equal_columns(strings, i, j, m)
     C = lambda i, j, r: subsections(strings, i, j, r)
     
-    
+    OPT_BUILD_HAT_CACHE = {}
+
     def OPT_BUILD_HAT(i, j):
+        if (i, j) in OPT_BUILD_HAT_CACHE:
+            return OPT_BUILD_HAT_CACHE[(i, j)]
+
         if j - i < 2:
             return None, 0
 
@@ -145,7 +149,9 @@ def OPT_BUILD_CACHED(strings, i, j):
 
             return candidate, candidate_edges
 
-        return min((result_starting_at(row) for row in Rij), key=lambda x: x[1])
+        result = min((result_starting_at(row) for row in Rij), key=lambda x: x[1])
+        OPT_BUILD_HAT_CACHE[(i, j)] = result
+        return result
         
 
     Kij = K(i, j)
