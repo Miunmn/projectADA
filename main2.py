@@ -76,7 +76,7 @@ def subsections(strings, i, j, r):
 
 
 # returns the minimal number of nodes that a GenSPT from strings[i:j] could have
-# Complexity: Yes
+# Complexity: (?)
 def OPT(strings, i, j):
     m = len(strings[i])
     # renaming to match with the paper
@@ -89,12 +89,17 @@ def OPT(strings, i, j):
             
         Kij = K(i, j)
         Rij = (x for x in range(m) if x not in Kij)
-        # Cijrs = (C(i, j, r) for r in Rij)
-        def cost(i_, j_): return OPT_HAT(i_, j_) + len(K(i_, j_)) - len(Kij)
 
-        return min(sum(cost(i_, j_) for i_, j_ in C(i, j, r)) for r in Rij)
+        # Complexity: T(j_ - i_) + O(j_ - i_)
+        def new_nodes(i_, j_): 
+            return OPT_HAT(i_, j_) + len(K(i_, j_)) - len(Kij)
+          
+        # literally the formula, but cuter (?)
+        # Complexity: Idk, u tell me
+        return min(sum(new_nodes(i_, j_) for i_, j_ in C(i, j, r)) for r in Rij)
 
     return OPT_HAT(i, j) + len(K(i, j))
+
 
 def OPT_BUILD(strings, i, j):
     m = len(strings[0])
@@ -108,26 +113,31 @@ def OPT_BUILD(strings, i, j):
         Kij = K(i, j)
         Rij = (x for x in range(m) if x not in Kij)
 
-        def result_starting_at(r):
-            candidate, candidate_edges = GenSPT(r), 0
+        def trie_with_root(r):
+            root, edges = GenSPT(r), 0
+
             for i_, j_ in C(i, j, r):
-                tail, tail_edges = OPT_BUILD_HAT(i_, j_)
+                branch, branch_edges = OPT_BUILD_HAT(i_, j_)
                 Ki_j_ = K(i_, j_)
+                edges += branch_edges + len(Ki_j_) - len(Kij)
 
+                # append all nodes to the front of the branc (except the root)
                 for r_ in Ki_j_ - Kij - {r}:
-                    tail = GenSPT(r_, {strings[i_][r_]: tail})
+                    branch = GenSPT(r_, {strings[i_][r_]: branch})
 
-                candidate.children[strings[i_][r]] = tail
-                candidate_edges += tail_edges + len(Ki_j_) - len(Kij)
+                # only then append the branch to the root
+                root.children[strings[i_][r]] = branch
 
-            return candidate, candidate_edges
+            return root, edges
 
-        return min((result_starting_at(row) for row in Rij), key=lambda x: x[1])
+        candidates = (trie_with_root(r) for r in Rij)
+        return min(candidates, key=lambda x: x[1])
         
 
     Kij = K(i, j)
     root, nodes = OPT_BUILD_HAT(i, j)
 
+    # front append, again
     for k_index in Kij:
         root = GenSPT(k_index, {strings[0][k_index]: root})
 
@@ -140,25 +150,31 @@ def OPT_BUILD_CACHED(strings, i, j):
     
     OPT_BUILD_HAT_CACHE = {}
 
+    # assuming j = n and i = 0 on the first call, and i < j on every call
+    # There are n possible j's, with j possible i's. 
+    # So there are n^2 states
     def OPT_BUILD_HAT(i, j):
         if (i, j) in OPT_BUILD_HAT_CACHE:
-            print('a')
             return OPT_BUILD_HAT_CACHE[(i, j)]
 
         if j - i < 2:
-            print(f"TRIVIAL({i}, {j})")
             return None, 0
 
-        print(f"OPT_BUILD_HAT_CACHED({i}, {j})")
+        # O(n) worst case
         Kij = K(i, j)
-        Rij = (x for x in range(m) if x not in Kij)
+        Rij = (r for r in range(m) if r not in Kij)
 
+        # Complexity: O(n*(n + m))
         def result_starting_at(r):
             candidate, candidate_edges = GenSPT(r), 0
             for i_, j_ in C(i, j, r):
+                # Memo analysis, let's assume the call is free
                 tail, tail_edges = OPT_BUILD_HAT(i_, j_)
+                # O(n) worst case
                 Ki_j_ = K(i_, j_)
 
+                # Every r_ can only appear once on the entire tail build
+                # O(m) i guess?
                 for r_ in Ki_j_ - Kij - {r}:
                     tail = GenSPT(r_, {strings[i_][r_]: tail})
 
@@ -167,7 +183,7 @@ def OPT_BUILD_CACHED(strings, i, j):
 
             return candidate, candidate_edges
 
-        result = min((result_starting_at(row) for row in Rij), key=lambda x: x[1])
+        result = min((result_starting_at(r) for r in Rij), key=lambda x: x[1])
         OPT_BUILD_HAT_CACHE[(i, j)] = result
         return result
         
