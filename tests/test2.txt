@@ -1,0 +1,7 @@
+duenho(a, b)
+duenho(a, c)
+duenho(b, a)
+duenho(c, a)
+duenho(a, d)
+hermanos(a, b, c, d)
+hermanos(a, c, d, a)

@@ -86,7 +86,6 @@ def OPT(strings, i, j):
     def OPT_HAT(i, j):
         if j - i < 2:
             return 0                                                                            
-            
         Kij = K(i, j)
         Rij = (x for x in range(m) if x not in Kij)
 
