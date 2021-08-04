@@ -211,14 +211,12 @@ def solve(root, query):
         if root is None:
             return {var}
 
-        position = root.alpha
-        character = query[position]
-
+        character = query[root.alpha]
         if character == 'X':
             subproblems = (find(c, k) for k, c in root.children.items())
             return reduce(or_, subproblems, set())
-            
-        if character not in root.children:
+             
+        elif character not in root.children:
             return set()
 
         return find(root.children[character], var)
