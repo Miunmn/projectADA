@@ -1,6 +1,6 @@
 from gen_spt import GenSPT, subsections, print_tree
 from typing import *
-import csv, sys
+import sys
 from dataclasses import dataclass
 
 # Execution time: O(n*m)
@@ -101,7 +101,7 @@ def recover_permutation(max_frequencies, original_positions):
 def main():
     str_list = []
 
-    with open('tests/'+ sys.argv[1] +'.txt', 'r') as file:
+    with open('tests/build/'+ sys.argv[1] +'.txt', 'r') as file:
         str_list.extend((line.rstrip() for line in file))
 
     trie, nodes = make_simple_spt(str_list, list(range(len(str_list[0]))))

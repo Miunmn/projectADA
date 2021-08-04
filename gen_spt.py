@@ -2,8 +2,6 @@ from __future__ import annotations
 from dataclasses import *
 from typing import *
 from itertools import groupby
-from functools import reduce
-from operator import or_
 import sys
 
 @dataclass
@@ -204,33 +202,13 @@ def MIN_TRIE_GEN_CACHED(strings):
     return OPT_BUILD_CACHED(strings, 0, len(strings))
 
 
-def solve(root, query):
-    def find(root: Optional[GenSPT], var=None):
-        if root is None:
-            return {var}
-
-        character = query[root.alpha]
-        if character == 'X':
-            subproblems = (find(c, k) for k, c in root.children.items())
-            return reduce(or_, subproblems, set())
-
-        elif character not in root.children:
-            return set()
-
-        return find(root.children[character], var)
-
-    return find(root, None)
-
-
-
 def main ():
     strings = ['abcd', 'acdd']
     trie, nodes = MIN_TRIE_GEN(strings)
     
     with open("test.txt", 'w') as f:
         print_tree(trie, file=f)
-
-    print(solve(trie, 'aXdd'))
+    
     
 
 if __name__ == '__main__':
