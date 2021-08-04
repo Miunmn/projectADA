@@ -2,10 +2,8 @@ from __future__ import annotations
 from dataclasses import *
 from typing import *
 from itertools import groupby
-from math import inf
 from functools import reduce
 from operator import or_
-
 import sys
 
 @dataclass
@@ -27,7 +25,7 @@ def print_tree(root_node: Optional[GenSPT], file=sys.stdout):
 
     self = Context(root_node, 0, "")
     while self is not None:
-        if not isinstance(self.root_node, GenSPT):
+        if not issubclass(type(self.root_node), GenSPT):
             print("  " * self.level + self.c + repr(self.root_node), file=file)
             self = self.caller
             continue
@@ -215,17 +213,13 @@ def solve(root, query):
         if character == 'X':
             subproblems = (find(c, k) for k, c in root.children.items())
             return reduce(or_, subproblems, set())
-             
+
         elif character not in root.children:
             return set()
 
         return find(root.children[character], var)
 
     return find(root, None)
-
-
-    
-
 
 
 

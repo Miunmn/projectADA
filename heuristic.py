@@ -1,18 +1,37 @@
+from gen_spt import GenSPT, subsections, print_tree
 from typing import *
-from trie import Trie
 import csv, sys
+from dataclasses import dataclass
+
+# Execution time: O(n*m)
+# Space: O(n*m)
+def make_simple_spt(strings: List[str], permutation: List[int]):
+    permuted_strings = [''.join(s[i] for i in permutation) for s in strings]
+    C = lambda i, j, k: subsections(permuted_strings, i, j, k)
+
+    # any character can only be invoked once in build. 
+    # There are n*m characters. Thus, complexity is O(n*m)
+    def build(i, j, k):
+        if k >= len(permutation):
+            return None, 0
+
+        root, edges = GenSPT(permutation[k]), 0
+        for i_, j_ in C(i, j, k):
+            child, subedges = build(i_, j_, k + 1)
+            edges += subedges + 1
+            root.children[permuted_strings[i_][k]] = child
+        return root, edges
+
+    return build(0, len(permuted_strings), 0)
+
 
 FrequencyMap = Dict[str, int]
 
-
 # Execution time: O(n*m + m*|E| + m*lg(m)) < O(n*m + m*lg(m))
 # Space: O(n*m)
-def heuristic_best_trie(str_list: List[str]) -> Tuple[Trie, int]:
+def heuristic_best_trie(str_list: List[str]):
     p = heuristic_best_permutation(str_list)
-
-    permuted_input = (''.join(s[i] for i in p) for s in str_list)   # O(n*m)
-    trie = Trie(permuted_input)                                     # O(n*m)
-    return trie, trie.nodes()
+    return make_simple_spt(str_list, p)
 
 
 # Execution time: O(n*m + m + n) ~ O(n*m)
@@ -81,23 +100,19 @@ def recover_permutation(max_frequencies, original_positions):
 
 def main():
     str_list = []
+
     with open('tests/'+ sys.argv[1] +'.txt', 'r') as file:
         str_list.extend((line.rstrip() for line in file))
-    
-    if len(str_list) < 1:
-        return
 
-    trie = Trie(str_list)
+    trie, nodes = make_simple_spt(str_list, list(range(len(str_list[0]))))
 
-    print("Original:")
-    print(f"nodes={trie.nodes()}")
-    trie.pretty_print()
+    print(f"Original: nodes={nodes}")
+    print_tree(trie)
 
-    trie2, nodes = heuristic_best_trie(str_list)
+    trie2, nodes2 = heuristic_best_trie(str_list)
 
-    print("Optimized:")
-    print(f"{nodes=}")
-    trie2.pretty_print()
+    print(f"\nOptimized: nodes={nodes2}")
+    print_tree(trie2)
 
 
 if __name__ == '__main__':
