@@ -3,6 +3,9 @@ from dataclasses import *
 from typing import *
 from itertools import groupby
 from math import inf
+from functools import reduce
+from operator import or_
+
 import sys
 
 @dataclass
@@ -202,10 +205,40 @@ def MIN_TRIE_GEN(strings):
 def MIN_TRIE_GEN_CACHED(strings):
     return OPT_BUILD_CACHED(strings, 0, len(strings))
 
+
+def solve(root, query):
+    def find(root: Optional[GenSPT], var=None):
+        if root is None:
+            return {var}
+
+        position = root.alpha
+        character = query[position]
+
+        if character == 'X':
+            subproblems = (find(c, k) for k, c in root.children.items())
+            return reduce(or_, subproblems, set())
+            
+        if character not in root.children:
+            return set()
+
+        return find(root.children[character], var)
+
+    return find(root, None)
+
+
+    
+
+
+
+
 def main ():
-    strings = ['aaaa', 'abbb', 'acbc', 'addd']
+    strings = ['abcd', 'acdd']
+    trie, nodes = MIN_TRIE_GEN(strings)
+    
     with open("test.txt", 'w') as f:
-        print_tree(MIN_TRIE_GEN(strings)[0], file=f)
+        print_tree(trie, file=f)
+
+    print(solve(trie, 'aXdd'))
     
 
 if __name__ == '__main__':
