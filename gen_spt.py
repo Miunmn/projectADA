@@ -20,7 +20,6 @@ def print_tree(root_node: Optional[GenSPT], file=sys.stdout):
         caller: Optional[Context] = None
         skip_print: bool = False
 
-
     self = Context(root_node, 0, "")
     while self is not None:
         if not issubclass(type(self.root_node), GenSPT):
@@ -208,7 +207,7 @@ def main ():
     
     with open("test.txt", 'w') as f:
         print_tree(trie, file=f)
-    
+
     
 
 if __name__ == '__main__':

@@ -1,0 +1,4 @@
+# duenho
+GenSPT(alpha=0, children={'a': GenSPT(alpha=1, children={'d': None}), 'b': GenSPT(alpha=1, children={'a': None}), 'c': GenSPT(alpha=1, children={'a': None})})
+# hermanos
+GenSPT(alpha=0, children={'a': GenSPT(alpha=3, children={'d': GenSPT(alpha=2, children={'c': GenSPT(alpha=1, children={'b': None})}), 'a': GenSPT(alpha=2, children={'d': GenSPT(alpha=1, children={'c': None})})})})

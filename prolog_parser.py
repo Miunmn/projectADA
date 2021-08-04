@@ -59,13 +59,21 @@ TRIE = seq(
 
 VALUE = NONE | TRIE
 
+TRIE_NAME = SHARP >> (letter.at_least(1) << WHITESPACE).concat()
+# TRIE_NAME = SHARP >> NAME << WHITESPACE
+NAMED_TRIE = seq(TRIE_NAME, VALUE)
+TRIE_FILE = WHITESPACE >> NAMED_TRIE.at_least(1)
 
 def parse_trie_file(file_contents):
-    return TRIE.parse(file_contents)
+    return TRIE_FILE.parse(file_contents)
 
 
 if __name__ == '__main__':
-    file_contents = "GenSPT(alpha=0, children={'a': GenSPT(alpha=1, children={'d': None}), 'b': GenSPT(alpha=1, children={'a': None}), 'c': GenSPT(alpha=1, children={'a': None})})"
-    print(print_tree(parse_trie_file(file_contents)))
+    file_contents = """# duenho
+GenSPT(alpha=0, children={'a': GenSPT(alpha=1, children={'d': None}), 'b': GenSPT(alpha=1, children={'a': None}), 'c': GenSPT(alpha=1, children={'a': None})})
+# hermanos
+GenSPT(alpha=0, children={'a': GenSPT(alpha=3, children={'d': GenSPT(alpha=2, children={'c': GenSPT(alpha=1, children={'b': None})}), 'a': GenSPT(alpha=2, children={'d': GenSPT(alpha=1, children={'c': None})})})})
+"""
+    print(parse_trie_file(file_contents))
 
     
