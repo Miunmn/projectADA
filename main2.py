@@ -3,6 +3,7 @@ from dataclasses import *
 from typing import *
 from itertools import groupby
 from math import inf
+import sys
 
 @dataclass
 class GenSPT:
@@ -10,7 +11,7 @@ class GenSPT:
     children: dict[str, GenSPT] = field(default_factory=dict)
 
 # self descriptive (the behaviour, not the implementation)
-def print_tree(root_node: Optional[GenSPT]):
+def print_tree(root_node: Optional[GenSPT], file=sys.stdout):
     @dataclass
     class Context:
         root_node: GenSPT
@@ -24,12 +25,12 @@ def print_tree(root_node: Optional[GenSPT]):
     self = Context(root_node, 0, "")
     while self is not None:
         if not isinstance(self.root_node, GenSPT):
-            print("  " * self.level + self.c + repr(self.root_node))
+            print("  " * self.level + self.c + repr(self.root_node), file=file)
             self = self.caller
             continue
         
         if not self.skip_print: 
-            print("  " * self.level + self.c + f"GenSPT(alpha={self.root_node.alpha}, children=" + "{")
+            print("  " * self.level + self.c + f"GenSPT(alpha={self.root_node.alpha}, children=" + "{", file=file)
             self.skip_print = True
 
         if self.children is None: 
@@ -40,7 +41,7 @@ def print_tree(root_node: Optional[GenSPT]):
             self = call
             break
         else:
-            print("  " * self.level + "}")
+            print("  " * self.level + "}", file=file)
             self = self.caller
 
 # returns true if all elements in iterable are the same
@@ -203,7 +204,8 @@ def MIN_TRIE_GEN_CACHED(strings):
 
 def main ():
     strings = ['aaaa', 'abbb', 'acbc', 'addd']
-    print(OPT(strings, 0, len(strings)))
+    with open("test.txt", 'w') as f:
+        print_tree(MIN_TRIE_GEN(strings)[0], file=f)
     
 
 if __name__ == '__main__':
