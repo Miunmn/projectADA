@@ -192,47 +192,6 @@ def OPT_BUILD_CACHED(strings, i, j):
 
     return root, (nodes + len(Kij))
 
-def OPT_BOTTOM_UP(strings):
-    n = len(strings)
-    m = len(strings[0])
-    
-    K_VALS = {(i, j): equal_columns_optimized(strings, i, j, m) for j in range(m + 1) for i in range(j)}
-    K = lambda i, j: K_VALS[(i, j)]
-    C = lambda i, j, r: subsections(strings, i, j, r)
-
-    OPT_HAT = [[[None, inf]]*(n + 1) for row in range(n)]
-
-    #Base case
-    for i in range(n):
-        OPT_HAT[i][i + 1][1] = 0
-
-    # Complexity: O(n*(n + m))
-    def result_starting_at(r, Kij):
-        candidate, candidate_edges = GenSPT(r), 0
-        for i_, j_ in C(i, j, r):
-            # Memo analysis, let's assume the call is free
-            tail, tail_edges = OPT_HAT[i_][j_]
-            Ki_j_ = K(i_, j_)
-
-            # Every r_ can only appear once on the entire tail build
-            # O(m) i guess?
-            for r_ in Ki_j_ - Kij - {r}:
-                tail = GenSPT(r_, {strings[i_][r_]: tail})
-
-            candidate.children[strings[i_][r]] = tail
-            candidate_edges += tail_edges + len(Ki_j_) - len(Kij)
-
-        return candidate, candidate_edges
-
-    for length in range(2, n):
-        for i in range(0, n - length + 1):
-            j = i + length
-            K_val = K(i, j)
-            R_val = (r for r in range(m) if r not in K_val)
-            OPT_HAT[i][j] = min([result_starting_at(r, K_val) for r in R_val], key=lambda x: x[1])
-
-    return OPT_HAT[0][n][1] + len(K(0, n))
-
 def MIN_TRIE_GEN(strings):
     return OPT_BUILD(strings, 0, len(strings))
 
@@ -241,52 +200,66 @@ def MIN_TRIE_GEN_CACHED(strings):
     return OPT_BUILD_CACHED(strings, 0, len(strings))
 
 def MIN_TRIE_GEN_DP(strings):
-    pass
     n = len(strings)
     m = len(strings[0])
     
-    K_VALS = {(i, j): equal_columns_optimized(strings, i, j, m) for j in range(m + 1) for i in range(j)}
+    #O(m*n^2)
+    K_VALS = {(i, j): equal_columns_optimized(strings, i, j, m) for j in range(n + 1) for i in range(j)}
     K = lambda i, j: K_VALS[(i, j)]
+    #O(n)
     C = lambda i, j, r: subsections(strings, i, j, r)
 
-    OPT_HAT = [[inf]*(n + 1) for row in range(n)]
+    #Initialization: O(n*m)
+    OPT_HAT = [[(None, inf)]*(n + 1) for row in range(n)]
 
-    #Base case
+    #Base case initialization: O(n)
     for i in range(n):
-        OPT_HAT[i][i + 1] = 0
+        OPT_HAT[i][i + 1] = None, 0
 
-    for lenght in range(2, n):
-        for i in range(0, n - lenght + 1):
-            j = i + lenght
-            Kij = K(i, j)
-            Rij = (r for r in range(m) if r not in Kij)
 
-            def result_starting_at(r):
-                candidate_edges = 0
-                for i_, j_ in C(i, j, r):
-                    # tail, tail_edges = OPT_HAT[i_][j_]
-                    edges = OPT_HAT[i_][j_]
-                    Ki_j_ = K(i_, j_)
+    for lenght in range(2, n + 1):                                        #n states
+        for i in range(0, n - lenght + 1):                                #O(n)     
+            j = i + lenght                                                #O(1) 
+            Kij = K(i, j)                                                 #O(1)
+            Rij = (r for r in range(m) if r not in Kij)                   #O(1)
 
-                    candidate_edges += edges + len(Ki_j_) - len(Kij)
+            opt, opt_edges = None, inf
+            for r in Rij:                                                 #O(m)     
+                candidate, candidate_edges = GenSPT(r), 0               
+                for i_, j_ in C(i, j, r):                                 #O(n)    
+                    tail, tail_edges = OPT_HAT[i_][j_]                    #O(1)
+                    Ki_j_ = K(i_, j_)                                     #O(1)
 
-                return candidate_edges
+                    for r_ in Ki_j_ - Kij - {r}:                          #O(1) amortized (r_ never repeats)
+                        tail = GenSPT(r_, {strings[i_][r_]: tail})
+
+                    candidate.children[strings[i_][r]] = tail
+                    candidate_edges += tail_edges + len(Ki_j_) - len(Kij) #O(1)
+
+                if candidate_edges < opt_edges:
+                    opt, opt_edges = candidate, candidate_edges
             
-            OPT_HAT[i][j] = min((result_starting_at(r) for r in Rij))
+            OPT_HAT[i][j] = opt, opt_edges
     
-    return OPT_HAT[0][n] + len(K(0, n))
+    
+    Kij = K(0, n)
+    root, nodes = OPT_HAT[0][n]
+
+    for k_index in Kij:
+        root = GenSPT(k_index, {strings[0][k_index]: root})
+
+    return root, (nodes + len(Kij))
 
 
 def main ():
     str_list = []
 
-    with open('tests/build/'+ 'inMed_1' +'.txt', 'r') as file:
+    with open('tests/build/'+ sys.argv[1] +'.txt', 'r') as file:
         str_list.extend((line.rstrip() for line in file))
 
-    #trie, nodes = MIN_TRIE_GEN_CACHED(str_list)
-    
-    #print(f"{nodes=}")
-    print(OPT_BOTTOM_UP(str_list))
+    trie, nodes = MIN_TRIE_GEN_CACHED(str_list)
+    print_tree(trie)
+    print(f"{nodes=}")
 
 
 if __name__ == '__main__':
