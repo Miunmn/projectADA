@@ -142,18 +142,12 @@ def OPT_BUILD(strings, i, j):
     return root, (nodes + len(Kij))
     
 def OPT_BUILD_CACHED(strings, i, j):
-    CALL_RATE = 0
-    BASE_CASE_RATE = 0
-    K_CACHE_RATE = 0
-    C_CACHE_RATE = 0
     m = len(strings[0])
     
-
-    K = lambda i, j: equal_columns_optimized(strings, i, j, m)
-    K_VALS = {(i, j): K(i, j) for j in range(m + 1) for i in range(j)}
+    K_VALS = {(i, j): equal_columns_optimized(strings, i, j, m) for j in range(m + 1) for i in range(j)}
     K = lambda i, j: K_VALS[(i, j)]
 
-    C = lambda i, j, r: subsections(strings, i, j, r)
+    def C(i, j, r): return subsections(strings, i, j, r)
     
     OPT_BUILD_HAT_CACHE = {}
 
@@ -162,18 +156,12 @@ def OPT_BUILD_CACHED(strings, i, j):
     # So there are n^2 states
 
     def OPT_BUILD_HAT(i, j):
-        nonlocal CALL_RATE
-        nonlocal BASE_CASE_RATE
-        CALL_RATE += 1
         if (i, j) in OPT_BUILD_HAT_CACHE:
-            BASE_CASE_RATE += 1
             return OPT_BUILD_HAT_CACHE[(i, j)]
 
         if j - i < 2:
-            BASE_CASE_RATE += 1
             return None, 0
-            
-        # O(n) worst case
+
         Kij = K(i, j)
         Rij = (r for r in range(m) if r not in Kij)
 
@@ -183,7 +171,6 @@ def OPT_BUILD_CACHED(strings, i, j):
             for i_, j_ in C(i, j, r):
                 # Memo analysis, let's assume the call is free
                 tail, tail_edges = OPT_BUILD_HAT(i_, j_)
-                # O(n) worst case
                 Ki_j_ = K(i_, j_)
 
                 # Every r_ can only appear once on the entire tail build
@@ -207,10 +194,6 @@ def OPT_BUILD_CACHED(strings, i, j):
     for k_index in Kij:
         root = GenSPT(k_index, {strings[0][k_index]: root})
 
-    print(f"{CALL_RATE=}")
-    print(f"{BASE_CASE_RATE=}")
-    print(f"{K_CACHE_RATE=}")
-    print(f"{C_CACHE_RATE=}")
     return root, (nodes + len(Kij))
 
 def MIN_TRIE_GEN(strings):
@@ -230,7 +213,6 @@ def main ():
     trie, nodes = MIN_TRIE_GEN_CACHED(str_list)
     
     print(f"{nodes=}")
-
 
     
 
