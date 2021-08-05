@@ -27,15 +27,33 @@ string stringGenerator (int N){
 
 int main() {
   int N, M;
-  cin >> N >> M;
+  N = 10; M = 10;
   vector<string> data;
   for (int i = 0; i < M; ++i)
        data.push_back(stringGenerator(N));
   auto res = transpose(data);
+
+  //Rules
   for (int i = 0; i < N; i++)
   {
+      cout << "r" << (i % 3) << " ";
       for (int j = 0; j < M; j++)
           cout << res[i][j];
       cout << endl;
   }
+
+  //Queries
+  for (int i = 0; i < N; i++)
+  {
+      int random = rand() % N;
+      cout << "r" << (i % 3) << " ";
+      for (int j = 0; j < M; j++)
+          if (j != random)
+              cout << res[i][j];
+          else 
+              cout << "X";
+      cout << endl;
+  }
+
+
 }
