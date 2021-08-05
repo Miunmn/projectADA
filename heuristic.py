@@ -3,6 +3,8 @@ from typing import *
 import sys
 from dataclasses import dataclass
 
+
+
 # Execution time: O(n*m)
 # Space: O(n*m)
 def make_simple_spt(strings: List[str], permutation: List[int]):
@@ -107,12 +109,12 @@ def main():
     trie, nodes = make_simple_spt(str_list, list(range(len(str_list[0]))))
 
     print(f"Original: nodes={nodes}")
-    print_tree(trie)
+    # print_tree(trie)
 
     trie2, nodes2 = heuristic_best_trie(str_list)
 
     print(f"\nOptimized: nodes={nodes2}")
-    print_tree(trie2)
+    # print_tree(trie2)
 
 
 if __name__ == '__main__':

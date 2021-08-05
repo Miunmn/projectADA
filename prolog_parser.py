@@ -19,7 +19,7 @@ NONE = LEXEME(string('None')).result(None)
 NUMBER = LEXEME(regex(r'(0|[1-9][0-9]*)')).map(int)
 
 COMMA  = LEXEME(string(','))
-CHARACTER = LEXEME(letter)
+CHARACTER = letter
 NAME = LEXEME(CHARACTER.at_least(1).concat())
 
 ARGS = CHARACTER.sep_by(COMMA).concat()
@@ -30,16 +30,6 @@ FILE = whitespace.optional() >> RULES
 GEN_SPT_DECL = LEXEME(string('GenSPT'))
 GEN_SPT_ALPHA = LEXEME(string('alpha'))
 GEN_SPT_CHILDREN = LEXEME(string('children'))
-
-def parse_input_file (file_contents):
-    rules = {}
-
-    parsed = FILE.parse(file_contents)
-    for name, value in parsed:
-        rules.setdefault(name, []).append(value)
-
-    return rules
-
 QUOTED_CHAR = LEXEME(string('\'') >> CHARACTER << string('\''))
 
 @generate
@@ -59,21 +49,29 @@ TRIE = seq(
 
 VALUE = NONE | TRIE
 
-TRIE_NAME = SHARP >> (letter.at_least(1) << WHITESPACE).concat()
-# TRIE_NAME = SHARP >> NAME << WHITESPACE
+TRIE_NAME = SHARP >> NAME
 NAMED_TRIE = seq(TRIE_NAME, VALUE)
 TRIE_FILE = WHITESPACE >> NAMED_TRIE.at_least(1)
+
+
+def parse_input_file (file_contents):
+    rules = {}
+
+    parsed = FILE.parse(file_contents)
+    print(parsed)
+    for name, value in parsed:
+        rules.setdefault(name, []).append(value)
+
+    return rules
 
 def parse_trie_file(file_contents):
     return TRIE_FILE.parse(file_contents)
 
 
 if __name__ == '__main__':
-    file_contents = """# duenho
-GenSPT(alpha=0, children={'a': GenSPT(alpha=1, children={'d': None}), 'b': GenSPT(alpha=1, children={'a': None}), 'c': GenSPT(alpha=1, children={'a': None})})
-# hermanos
-GenSPT(alpha=0, children={'a': GenSPT(alpha=3, children={'d': GenSPT(alpha=2, children={'c': GenSPT(alpha=1, children={'b': None})}), 'a': GenSPT(alpha=2, children={'d': GenSPT(alpha=1, children={'c': None})})})})
-"""
-    print(parse_trie_file(file_contents))
+    file_name = 'object.txt'
+    with open(file_name, 'r') as obj_file:
+        file_contents = obj_file.read()
+        print(parse_trie_file(file_contents))
 
     
