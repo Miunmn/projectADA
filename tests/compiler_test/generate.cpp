@@ -27,7 +27,7 @@ string stringGenerator (int N){
 
 int main() {
   int N, M;
-  N = 10; M = 10;
+  cin >> N >> M;
   vector<string> data;
   for (int i = 0; i < M; ++i)
        data.push_back(stringGenerator(N));
@@ -41,6 +41,7 @@ int main() {
           cout << res[i][j];
       cout << endl;
   }
+  cout << "#############" << endl;
 
   //Queries
   for (int i = 0; i < N; i++)
