@@ -20,6 +20,7 @@ TERMINATOR = string('\n') | eof
 QUERY = (WHITESPACE >> seq( NAME, ARGS ) << TERMINATOR).map(tuple)
 QUERY_FILE = QUERY.at_least(1) << WHITESPACE
 
+
 def solve_for_x(root: GenSPT, query: str):
 	def find(root: Optional[GenSPT], var: Optional[set]=None):
 		if root is None:
@@ -38,9 +39,6 @@ def solve_for_x(root: GenSPT, query: str):
 	return find(root, None)
 
 
-
-
-
 if __name__ == '__main__':
 	executable = sys.argv[1]
 	query_file = sys.argv[2]
@@ -51,10 +49,7 @@ if __name__ == '__main__':
 			query_contents = qf.read()
 			queries = QUERY_FILE.parse(query_contents)
 			print(queries)
-			for name, query in queries:
+			for qnum, (name, query) in enumerate(queries, start=1):
 				trie, nodes = trie_dict[name] 
-				print(solve_for_x(trie, query))
+				print(f"Query {qnum} -> {solve_for_x(trie, query)}")
 
-
-
-	#parser(filename)
