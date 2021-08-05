@@ -61,15 +61,8 @@ if __name__ == '__main__':
                         default='a.out',
                         help='output file from compilation')
     
-    namespace = parser.parse_args(sys.argv[1:])
-    print(namespace)
+    namespace = parser.parse_args()
     compile_file(namespace.file_name, namespace.output, namespace.use_optimal)
-#     file_name = sys.argv[1]
-#     dp = True
-#     if len(sys.argv) > 2:
-#         compile_file(file_name, sys.argv[2], dp)
-#     else:
-#         compile_file(file_name, 'a.out', dp)
-        
+
 
     

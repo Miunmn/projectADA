@@ -187,7 +187,7 @@ def MIN_TRIE_GEN_DP(strings):
             opt, opt_edges = None, inf
             for r in Rij:                                                 #O(m)     
                 candidate, candidate_edges = GenSPT(r), 0               
-                for i_, j_ in C(i, j, r):                                 #O(|sigma|) ~ O(n) 
+                for i_, j_ in C(i, j, r):                                 #O(max(|sigma|, n))
                     tail, tail_edges = OPT_HAT[i_][j_]                    #O(1)
                     Ki_j_ = K(i_, j_)                                     #O(1)
 
