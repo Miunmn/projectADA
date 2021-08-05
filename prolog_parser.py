@@ -34,6 +34,7 @@ QUOTED_CHAR = LEXEME(string('\'') >> CHARACTER << string('\''))
 
 @generate
 def child_dict_item():
+    
     name = yield QUOTED_CHAR
     yield COLON
     value = yield VALUE
@@ -58,7 +59,6 @@ def parse_input_file (file_contents):
     rules = {}
 
     parsed = FILE.parse(file_contents)
-    print(parsed)
     for name, value in parsed:
         rules.setdefault(name, []).append(value)
 

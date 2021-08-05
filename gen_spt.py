@@ -3,6 +3,7 @@ from dataclasses import *
 from typing import *
 from itertools import groupby
 import sys
+from math import inf
 
 @dataclass
 class GenSPT:
@@ -146,14 +147,9 @@ def OPT_BUILD_CACHED(strings, i, j):
     
     K_VALS = {(i, j): equal_columns_optimized(strings, i, j, m) for j in range(m + 1) for i in range(j)}
     K = lambda i, j: K_VALS[(i, j)]
-
-    def C(i, j, r): return subsections(strings, i, j, r)
+    C = lambda i, j, r: subsections(strings, i, j, r)
     
     OPT_BUILD_HAT_CACHE = {}
-
-    # assuming j = n and i = 0 on the first call, and i < j on every call
-    # There are n possible j's, with j possible i's. 
-    # So there are n^2 states
 
     def OPT_BUILD_HAT(i, j):
         if (i, j) in OPT_BUILD_HAT_CACHE:
@@ -196,6 +192,47 @@ def OPT_BUILD_CACHED(strings, i, j):
 
     return root, (nodes + len(Kij))
 
+def OPT_BOTTOM_UP(strings):
+    n = len(strings)
+    m = len(strings[0])
+    
+    K_VALS = {(i, j): equal_columns_optimized(strings, i, j, m) for j in range(m + 1) for i in range(j)}
+    K = lambda i, j: K_VALS[(i, j)]
+    C = lambda i, j, r: subsections(strings, i, j, r)
+
+    OPT_HAT = [[[None, inf]]*(n + 1) for row in range(n)]
+
+    #Base case
+    for i in range(n):
+        OPT_HAT[i][i + 1][1] = 0
+
+    # Complexity: O(n*(n + m))
+    def result_starting_at(r, Kij):
+        candidate, candidate_edges = GenSPT(r), 0
+        for i_, j_ in C(i, j, r):
+            # Memo analysis, let's assume the call is free
+            tail, tail_edges = OPT_HAT[i_][j_]
+            Ki_j_ = K(i_, j_)
+
+            # Every r_ can only appear once on the entire tail build
+            # O(m) i guess?
+            for r_ in Ki_j_ - Kij - {r}:
+                tail = GenSPT(r_, {strings[i_][r_]: tail})
+
+            candidate.children[strings[i_][r]] = tail
+            candidate_edges += tail_edges + len(Ki_j_) - len(Kij)
+
+        return candidate, candidate_edges
+
+    for length in range(2, n):
+        for i in range(0, n - length + 1):
+            j = i + length
+            K_val = K(i, j)
+            R_val = (r for r in range(m) if r not in K_val)
+            OPT_HAT[i][j] = min([result_starting_at(r, K_val) for r in R_val], key=lambda x: x[1])
+
+    return OPT_HAT[0][n][1] + len(K(0, n))
+
 def MIN_TRIE_GEN(strings):
     return OPT_BUILD(strings, 0, len(strings))
 
@@ -203,18 +240,54 @@ def MIN_TRIE_GEN_CACHED(strings):
     print(len(strings))
     return OPT_BUILD_CACHED(strings, 0, len(strings))
 
+def MIN_TRIE_GEN_DP(strings):
+    pass
+    n = len(strings)
+    m = len(strings[0])
+    
+    K_VALS = {(i, j): equal_columns_optimized(strings, i, j, m) for j in range(m + 1) for i in range(j)}
+    K = lambda i, j: K_VALS[(i, j)]
+    C = lambda i, j, r: subsections(strings, i, j, r)
+
+    OPT_HAT = [[inf]*(n + 1) for row in range(n)]
+
+    #Base case
+    for i in range(n):
+        OPT_HAT[i][i + 1] = 0
+
+    for lenght in range(2, n):
+        for i in range(0, n - lenght + 1):
+            j = i + lenght
+            Kij = K(i, j)
+            Rij = (r for r in range(m) if r not in Kij)
+
+            def result_starting_at(r):
+                candidate_edges = 0
+                for i_, j_ in C(i, j, r):
+                    # tail, tail_edges = OPT_HAT[i_][j_]
+                    edges = OPT_HAT[i_][j_]
+                    Ki_j_ = K(i_, j_)
+
+                    candidate_edges += edges + len(Ki_j_) - len(Kij)
+
+                return candidate_edges
+            
+            OPT_HAT[i][j] = min((result_starting_at(r) for r in Rij))
+    
+    return OPT_HAT[0][n] + len(K(0, n))
+
 
 def main ():
     str_list = []
 
-    with open('tests/build/'+ sys.argv[1] +'.txt', 'r') as file:
+    with open('tests/build/'+ 'inMed_1' +'.txt', 'r') as file:
         str_list.extend((line.rstrip() for line in file))
 
-    trie, nodes = MIN_TRIE_GEN_CACHED(str_list)
+    #trie, nodes = MIN_TRIE_GEN_CACHED(str_list)
     
-    print(f"{nodes=}")
+    #print(f"{nodes=}")
+    print(OPT_BOTTOM_UP(str_list))
 
-    
 
 if __name__ == '__main__':
     main()
