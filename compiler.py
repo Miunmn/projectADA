@@ -5,6 +5,8 @@ from typing import *
 import pickle
 
 import sys
+import argparse
+
 
 def dict_from_pairs(pairs: list[tuple[str, str]]):   
     result = dict()
@@ -43,13 +45,31 @@ def compile_file(file, out, dp=False):
         compile_contents(file_contents, out, dp)
 
 
+
+
+
 if __name__ == '__main__':
-    file_name = sys.argv[1]
-    dp = True
-    if len(sys.argv) > 2:
-        compile_file(file_name, sys.argv[2], dp)
-    else:
-        compile_file(file_name, 'a.out', dp)
+    parser = argparse.ArgumentParser(description='Compile a miniprolog file.')
+    parser.add_argument('file_name', metavar='IN', type=str, 
+                        help='path to the input file')
+
+    parser.add_argument('--use-optimal', dest='use_optimal', action='store_const',
+                        const=True, default=False,
+                        help='sum the integers (default: find the max)')
+
+    parser.add_argument('-output', metavar='OUT', 
+                        default='a.out',
+                        help='output file from compilation')
+    
+    namespace = parser.parse_args(sys.argv[1:])
+    print(namespace)
+    compile_file(namespace.file_name, namespace.output, namespace.use_optimal)
+#     file_name = sys.argv[1]
+#     dp = True
+#     if len(sys.argv) > 2:
+#         compile_file(file_name, sys.argv[2], dp)
+#     else:
+#         compile_file(file_name, 'a.out', dp)
         
 
     

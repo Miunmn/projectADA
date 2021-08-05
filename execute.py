@@ -48,7 +48,6 @@ if __name__ == '__main__':
 		with open(query_file, 'r') as qf:
 			query_contents = qf.read()
 			queries = QUERY_FILE.parse(query_contents)
-			print(queries)
 			for qnum, (name, query) in enumerate(queries, start=1):
 				trie, nodes = trie_dict[name] 
 				print(f"Query {qnum} -> {solve_for_x(trie, query)}")
