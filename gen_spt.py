@@ -148,18 +148,12 @@ def OPT_BUILD_CACHED(strings, i, j):
     C_CACHE_RATE = 0
     m = len(strings[0])
     
-    K_CACHE = {}
-    def K(i, j):
-        nonlocal K_CACHE_RATE
-        if (i, j) in K_CACHE: 
-            K_CACHE_RATE += 1
-            return K_CACHE[(i, j)]
 
-        result = equal_columns_optimized(strings, i, j, m)
-        K_CACHE[(i, j)] = result
-        return result
+    K = lambda i, j: equal_columns_optimized(strings, i, j, m)
+    K_VALS = {(i, j): K(i, j) for j in range(m + 1) for i in range(j)}
+    K = lambda i, j: K_VALS[(i, j)]
 
-    def C(i, j, r): return subsections(strings, i, j, r)
+    C = lambda i, j, r: subsections(strings, i, j, r)
     
     OPT_BUILD_HAT_CACHE = {}
 
@@ -178,7 +172,7 @@ def OPT_BUILD_CACHED(strings, i, j):
         if j - i < 2:
             BASE_CASE_RATE += 1
             return None, 0
-
+            
         # O(n) worst case
         Kij = K(i, j)
         Rij = (r for r in range(m) if r not in Kij)
@@ -223,6 +217,7 @@ def MIN_TRIE_GEN(strings):
     return OPT_BUILD(strings, 0, len(strings))
 
 def MIN_TRIE_GEN_CACHED(strings):
+    print(len(strings))
     return OPT_BUILD_CACHED(strings, 0, len(strings))
 
 
@@ -235,6 +230,7 @@ def main ():
     trie, nodes = MIN_TRIE_GEN_CACHED(str_list)
     
     print(f"{nodes=}")
+
 
     
 
