@@ -99,7 +99,6 @@ def OPT(strings, i, j):
 
     return OPT_HAT(i, j) + len(K(i, j))
 
-
 def OPT_BUILD(strings, i, j):
     m = len(strings[0])
     K = lambda i, j: equal_columns_optimized(strings, i, j, m)
@@ -115,13 +114,13 @@ def OPT_BUILD(strings, i, j):
         def trie_with_root(r):
             root, edges = GenSPT(r), 0
 
-            for i_, j_ in C(i, j, r):
-                branch, branch_edges = OPT_BUILD_HAT(i_, j_)
+            for i_, j_ in C(i, j, r):                                          #O(|sigma|)
+                branch, branch_edges = OPT_BUILD_HAT(i_, j_)                   #T(n)
                 Ki_j_ = K(i_, j_)
                 edges += branch_edges + len(Ki_j_) - len(Kij)
 
                 # append all nodes to the front of the branc (except the root)
-                for r_ in Ki_j_ - Kij - {r}:
+                for r_ in Ki_j_ - Kij - {r}:                                   #O(n)
                     branch = GenSPT(r_, {strings[i_][r_]: branch})
 
                 # only then append the branch to the root
@@ -145,7 +144,7 @@ def OPT_BUILD(strings, i, j):
 def OPT_BUILD_CACHED(strings, i, j):
     m = len(strings[0])
     
-    K_VALS = {(i, j): equal_columns_optimized(strings, i, j, m) for j in range(m + 1) for i in range(j)}
+    K_VALS = {(i, j): equal_columns_optimized(strings, i, j, m) for j in range(len(strings) + 1) for i in range(j)}
     K = lambda i, j: K_VALS[(i, j)]
     C = lambda i, j, r: subsections(strings, i, j, r)
     
@@ -196,7 +195,6 @@ def MIN_TRIE_GEN(strings):
     return OPT_BUILD(strings, 0, len(strings))
 
 def MIN_TRIE_GEN_CACHED(strings):
-    print(len(strings))
     return OPT_BUILD_CACHED(strings, 0, len(strings))
 
 def MIN_TRIE_GEN_DP(strings):
@@ -226,7 +224,7 @@ def MIN_TRIE_GEN_DP(strings):
             opt, opt_edges = None, inf
             for r in Rij:                                                 #O(m)     
                 candidate, candidate_edges = GenSPT(r), 0               
-                for i_, j_ in C(i, j, r):                                 #O(n)    
+                for i_, j_ in C(i, j, r):                                 #O(|sigma|) ~ O(n) 
                     tail, tail_edges = OPT_HAT[i_][j_]                    #O(1)
                     Ki_j_ = K(i_, j_)                                     #O(1)
 
@@ -250,12 +248,11 @@ def MIN_TRIE_GEN_DP(strings):
 
     return root, (nodes + len(Kij))
 
-
 def main ():
-    str_list = []
+    str_list = ['ab', 'bc']
 
-    with open('tests/build/'+ sys.argv[1] +'.txt', 'r') as file:
-        str_list.extend((line.rstrip() for line in file))
+    # with open('tests/build/'+ sys.argv[1] +'.txt', 'r') as file:
+    #     str_list.extend((line.rstrip() for line in file))
 
     trie, nodes = MIN_TRIE_GEN_CACHED(str_list)
     print_tree(trie)

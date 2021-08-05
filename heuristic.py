@@ -1,8 +1,8 @@
-from gen_spt import GenSPT, subsections, print_tree
 from typing import *
 import sys
-from dataclasses import dataclass
 
+from trie import *
+from optimal import subsections
 
 
 # Execution time: O(n*m)

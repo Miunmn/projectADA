@@ -1,0 +1,3 @@
+r1 aXc
+r1 aaX
+r2 aX

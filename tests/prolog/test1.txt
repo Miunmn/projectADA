@@ -1,7 +1,4 @@
-duenho(a, b)
-duenho(a, c)
-duenho(b, a)
-duenho(c, a)
-duenho(a, d)
-hermanos(a, b, c, d)
-hermanos(a, c, d, a)
+r1 adc
+r1 aab
+r2 ac
+r2 bc
