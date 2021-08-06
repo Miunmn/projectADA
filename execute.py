@@ -10,6 +10,8 @@ import sys
 
 from trie import GenSPT
 
+sys.setrecursionlimit(6000)
+
 WHITESPACE = regex(r'[ ]*')
 LEXEME = lambda P: P << WHITESPACE
 
@@ -24,7 +26,7 @@ QUERY_FILE = QUERY.at_least(1) << WHITESPACE
 def solve_for_x(root: GenSPT, query: str):
 	def find(root: Optional[GenSPT], var: Optional[set]=None):
 		if root is None:
-			return {var}
+			return {var} if var is not None else {}
 
 		character = query[root.alpha]
 		if character == 'X':

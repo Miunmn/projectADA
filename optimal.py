@@ -167,59 +167,70 @@ def MIN_TRIE_GEN_DP(strings):
     #O(m*n^2)
     K_VALS = {(i, j): equal_columns_optimized(strings, i, j, m) for j in range(n + 1) for i in range(j)}
     K = lambda i, j: K_VALS[(i, j)]
+
     #O(n)
     C = lambda i, j, r: subsections(strings, i, j, r)
 
     #Initialization: O(n*m)
-    OPT_HAT = [[(None, inf)]*(n + 1) for row in range(n)]
+    OPT_HAT = [[inf] * (n + 1) for row in range(n)]
+    OPT_GRAPH = [[(None, [])] * (n + 1) for row in range(n)]
+
 
     #Base case initialization: O(n)
     for i in range(n):
-        OPT_HAT[i][i + 1] = None, 0
+        OPT_HAT[i][i + 1] = 0
 
+    def REBUILD_TREE(i, j):
+        root, childs = OPT_GRAPH[i][j]
+        if root is None:
+            return None
+
+        r = root.alpha
+        Kij = K(i, j)
+        for i_, j_ in childs:
+            tail = REBUILD_TREE(i_, j_)
+            for r_ in K(i_,j_) - Kij - {r}:
+                tail = GenSPT(r_, {strings[i_][r_]: tail})
+
+            root.children[strings[i_][r]] = tail
+        
+        return root
 
     for lenght in range(2, n + 1):                                        #n states
         for i in range(0, n - lenght + 1):                                #O(n)     
             j = i + lenght                                                #O(1) 
             Kij = K(i, j)                                                 #O(1)
-            Rij = (r for r in range(m) if r not in Kij)                   #O(1)
+            Rij = [r for r in range(m) if r not in Kij]                   #O(1)
 
-            opt, opt_edges = None, inf
             for r in Rij:                                                 #O(m)     
-                candidate, candidate_edges = GenSPT(r), 0               
-                for i_, j_ in C(i, j, r):                                 #O(max(|sigma|, n))
-                    tail, tail_edges = OPT_HAT[i_][j_]                    #O(1)
-                    Ki_j_ = K(i_, j_)                                     #O(1)
-
-                    for r_ in Ki_j_ - Kij - {r}:                          #O(1) amortized (r_ never repeats)
-                        tail = GenSPT(r_, {strings[i_][r_]: tail})
-
-                    candidate.children[strings[i_][r]] = tail
-                    candidate_edges += tail_edges + len(Ki_j_) - len(Kij) #O(1)
-
-                if candidate_edges < opt_edges:
-                    opt, opt_edges = candidate, candidate_edges
-            
-            OPT_HAT[i][j] = opt, opt_edges
-    
+                candidate_edges, c_childs = 0, [] 
+                for i_, j_ in C(i, j, r):   
+                    tail_edges = OPT_HAT[i_][j_]  
+                    c_childs.append((i_, j_))   
+                    candidate_edges += tail_edges + len(K(i_, j_)) - len(Kij) 
+                    
+                if candidate_edges < OPT_HAT[i][j]:
+                    OPT_HAT[i][j] = candidate_edges
+                    OPT_GRAPH[i][j] = (GenSPT(r), c_childs)
     
     Kij = K(0, n)
-    root, nodes = OPT_HAT[0][n]
+    nodes = OPT_HAT[0][n]
+    root = REBUILD_TREE(0, n)
 
-    for k_index in Kij:
-        root = GenSPT(k_index, {strings[0][k_index]: root})
+    for k in Kij:
+        root = GenSPT(k, {strings[0][k]: root})
 
-    return root, (nodes + len(Kij))
+    return root, nodes + len(Kij)
 
 def main ():
-    str_list = ['ab', 'bc']
+    str_list = []
 
-    # with open('tests/build/'+ sys.argv[1] +'.txt', 'r') as file:
-    #     str_list.extend((line.rstrip() for line in file))
+    with open('tests/build/'+ sys.argv[1] +'.txt', 'r') as file:
+        str_list.extend((line.rstrip() for line in file))
 
-    trie, nodes = MIN_TRIE_GEN_CACHED(str_list)
-    print_tree(trie)
-    print(f"{nodes=}")
+    root, nodes = MIN_TRIE_GEN_DP(str_list)
+    print(f"{nodes}")
+    print(root)
 
 
 if __name__ == '__main__':

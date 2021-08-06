@@ -4,7 +4,6 @@ from parsy import *
 from typing import *
 import pickle
 
-import sys
 import argparse
 
 
@@ -25,7 +24,7 @@ RULE = (WHITESPACE >> seq( NAME, ARGS ) << TERMINATOR).map(tuple)
 RULES = RULE.at_least(1).map(dict_from_pairs) << WHITESPACE
 
 def encode(rule_dict: dict[str, list[str]], optimal=False):
-    encoder = MIN_TRIE_GEN_CACHED if optimal else heuristic_best_trie
+    encoder = MIN_TRIE_GEN_DP if optimal else heuristic_best_trie
 
     result = {key: encoder(str_list) for key, str_list in rule_dict.items() }
     for key in result:
